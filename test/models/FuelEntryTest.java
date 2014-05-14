@@ -61,5 +61,19 @@ public class FuelEntryTest {
 		FuelEntry entry = new FuelEntry("98", 1.9, -14.22, 
 				new SimpleDateFormat("dd.MM.yyyy").parse("12.02.1998"));
 	}
+	@Test
+	public void testFuelEntryToArray() throws ParseException{
+		FuelEntry entry = new FuelEntry("95", "1,32", "32.32", "12.02.1998");
+		Object[] entryArray = entry.toArray();
+		assertTrue("Array length must be 4", entryArray.length == 4);
+		if (entryArray[0] != entry.getFuelName())
+			fail("Array item fuel type doesn't match object's");
+		if ((double)entryArray[1] != entry.getFuelPrice())
+			fail("Array item fuel price doesn't match object's value");
+		if ((double)entryArray[2] != entry.getFuelAmount())
+			fail("Array item fule amount doesn't match object's value");
+		if (entryArray[3] != entry.getRefuelingDate())
+			fail("Array item refuel date doesn't match object's value");
+	}
 
 }

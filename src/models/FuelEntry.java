@@ -93,5 +93,7 @@ public class FuelEntry {
 		else
 			return false;
 	}
-	
+	public Object[] toArray(){
+		return new Object[] {getFuelName(),getFuelPrice(),getFuelAmount(),getRefuelingDate()};
+	}
 }
