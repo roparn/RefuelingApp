@@ -69,6 +69,7 @@ public class MainAppMenu extends JFrame {
         final JTable table = new JTable(new FuelEntryTableModel(fuelEntries));
         table.setPreferredScrollableViewportSize(new Dimension(500, 70));
         table.setFillsViewportHeight(true);
+        table.setAutoCreateRowSorter(true);
         JScrollPane scrollPane = new JScrollPane(table);
         add(scrollPane);
 

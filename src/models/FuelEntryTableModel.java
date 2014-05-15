@@ -63,5 +63,4 @@ public class FuelEntryTableModel extends AbstractTableModel {
 			break;
 		}
 	}
-
 }
