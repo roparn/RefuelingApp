@@ -18,29 +18,44 @@ import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.text.DateFormatter;
 
 import models.FuelEntry;
 import models.FuelEntryTableModel;
+import models.FuelEntryTableModelTest;
 
 import dao.FileDao;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class MainAppMenu extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	JPanel panel;
+	private JPanel panel;
+	private JTable table;
+	private FlowLayout layout;
+	private FuelEntryTableModel tableModel;
+	public FuelEntryTableModel getTableModel(){
+		return tableModel;
+	}
 	private List<FuelEntry> fuelEntries;
     public List<FuelEntry> getFuelEntries() {
 		return fuelEntries;
@@ -55,31 +70,61 @@ public class MainAppMenu extends JFrame {
 	}
 	
 	public void initUI(){
-		// Initialize menu bar
-		initMenuBar();
 		// Initialize panel and its contents
 		initPanel();
+		// Initialize menu bar
+		initMenuBar();
 		// Initialize statusbar
 		initStatusbar();
         // Get data
         getData(FileDao.DEFAULT_FILE_LOCATION);
-		// Initialize list view
-		//initDataList();
-
-        final JTable table = new JTable(new FuelEntryTableModel(fuelEntries));
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-        table.setFillsViewportHeight(true);
-        table.setAutoCreateRowSorter(true);
-        JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane);
-
-        
-        
+        // Initialize table view
+        initTable();
+//        add(panel);
 		// Set mainwindow basic params
 		setTitle("Refueling app");
 		setSize(500, 500);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);  
+	}
+	private void initTable(){
+		tableModel = new FuelEntryTableModel(fuelEntries);
+        table = new JTable(tableModel);
+//        table.setPreferredScrollableViewportSize(new Dimension(400, 200));
+        // Create custom sorter, to sort table columns
+		TableRowSorter<FuelEntryTableModel> sorter 
+		    = new TableRowSorter<FuelEntryTableModel>((FuelEntryTableModel) table.getModel());
+		// This comparator sorts double values of fuel price and amount
+		Comparator<Double> doubleComparator = new Comparator<Double>() {
+			@Override
+			public int compare(Double d1, Double d2) {
+				return Double.compare(d1, d2);
+			}
+		};
+		// This comparator sorts dates column, because they need to be in
+		// custom dd.MM.yyyy format, it needed to be string, which means we need to
+		// reparse it back to date and compare
+		Comparator<String> dateComparator = new Comparator<String>() {
+			@Override
+			public int compare(String s1, String s2) {
+				Date d1,d2;
+				try {
+					d1 = new SimpleDateFormat("dd.MM.yyyy").parse(s1);
+					d2 = new SimpleDateFormat("dd.MM.yyyy").parse(s2);
+				} catch (ParseException e) {
+					e.printStackTrace();
+					return 0;
+				}
+				return d1.compareTo(d2);
+			}
+		};
+		sorter.setComparator(1, doubleComparator);
+		sorter.setComparator(2, doubleComparator);
+		sorter.setComparator(3, dateComparator);
+		table.setRowSorter(sorter);
+		
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane);
 	}
 	private void initStatusbar() {
 		// Add statusbar as a label
@@ -87,32 +132,24 @@ public class MainAppMenu extends JFrame {
         statusbar.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
         add(statusbar, BorderLayout.SOUTH);
 	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void initDataList(){
-        // Add data list as JList
-        JList list = new JList(fuelEntries.toArray());
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.getViewport().add(list);
-        scrollPane.setPreferredSize(new Dimension(250, 200));
-        add(scrollPane);
-	}
 	private void initPanel(){
 		// Initialize panel
+		layout = new FlowLayout();
 		panel = new JPanel();
+		panel.setLayout(layout);
 		getContentPane().add(panel);
-		panel.setLayout(null);
+		panel.setToolTipText("asdasd");
         // Adding load default file button
-        JButton loadDefault = new JButton("Reload");
-        loadDefault.setBounds(0, 0, 130, 30);
-        loadDefault.setToolTipText("Load default file for parsing");
-        loadDefault.addActionListener(new ActionListener() {
+        JButton reloadData = new JButton("Reload");
+        reloadData.setToolTipText("Reload data");
+        reloadData.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 getData(FileDao.DEFAULT_FILE_LOCATION);
            }
         });
-		panel.add(loadDefault);
+		panel.add(reloadData);
+		add(panel);
 	}
 	private void initMenuBar() {
 		// Menu bar

@@ -1,5 +1,6 @@
 package models;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -7,9 +8,11 @@ import javax.swing.table.AbstractTableModel;
 
 public class FuelEntryTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
-	private String[] columnNames = { "Fuel type", "Fuel price", "Fuel amount","Date" };
+	private final String[] columnNames = { "Fuel type", "Fuel price", "Fuel amount","Date" };
 	private List<FuelEntry> data;
-
+	public List<FuelEntry> getData() {
+		return data;
+	}
 	public FuelEntryTableModel(List<FuelEntry> data) {
 		this.data = data;
 	}
@@ -35,7 +38,7 @@ public class FuelEntryTableModel extends AbstractTableModel {
 		case 2:
 			return entry.getFuelAmount();
 		case 3:
-			return entry.getRefuelingDate();
+			return new SimpleDateFormat("dd.MM.yyyy").format(entry.getRefuelingDate());
 		default:
 			return null;
 		}

@@ -37,8 +37,7 @@ public class FuelEntry {
 		fuelAmount = fuelAmount.replaceAll(",", ".");
 		setFuelPrice(Double.parseDouble(fuelPrice));
 		setFuelAmount(Double.parseDouble(fuelAmount));
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-		setRefuelingDate(dateFormat.parse(refuelingDate));
+		setRefuelingDate(new SimpleDateFormat("dd.MM.yyyy").parse(refuelingDate));
 	}
 	public String getFuelName() {
 		return fuelName;
