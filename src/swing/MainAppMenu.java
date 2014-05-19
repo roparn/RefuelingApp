@@ -3,10 +3,10 @@ package swing;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -14,31 +14,30 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import javax.swing.ListModel;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.text.DateFormatter;
+
+import controller.MainViewController;
+
+import view.MainView;
 
 import models.FuelEntry;
 import models.FuelEntryTableModel;
-import models.FuelEntryTableModelTest;
 
 import dao.FileDao;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,12 +45,19 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class MainAppMenu extends JFrame {
+public class MainAppMenu extends JFrame implements ItemListener {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel panel;
 	private JTable table;
 	private FlowLayout layout;
+	// Filter vars
+	private String fuelNameFilterText;
+	private RowFilter<FuelEntryTableModel, Object> fuelTypeFilter;
+	private RowFilter<FuelEntryTableModel, Object> fuelDateFilter;
+	private Date filterMonthText;
+	// Tablemodel and sorter vars
+	private TableRowSorter<FuelEntryTableModel> sorter;
 	private FuelEntryTableModel tableModel;
 	public FuelEntryTableModel getTableModel(){
 		return tableModel;
@@ -61,6 +67,7 @@ public class MainAppMenu extends JFrame {
 		return fuelEntries;
 	}
 	private JLabel statusbar;
+	private JLabel sumLabel;
 	public JLabel getStatusbar() {
 		return statusbar;
 	}
@@ -70,17 +77,21 @@ public class MainAppMenu extends JFrame {
 	}
 	
 	public void initUI(){
-		// Initialize panel and its contents
-		initPanel();
-		// Initialize menu bar
-		initMenuBar();
 		// Initialize statusbar
 		initStatusbar();
         // Get data
         getData(FileDao.DEFAULT_FILE_LOCATION);
+		// Initialize panel and its contents
+		initPanel();
+		initFilteringComponents();
+		// Initialize menu bar
+		initMenuBar();
         // Initialize table view
         initTable();
-//        add(panel);
+        // Create label for sum
+        sumLabel = new JLabel(String.valueOf(tableModel.getTotalCosts()));
+        panel.add(sumLabel);
+        
 		// Set mainwindow basic params
 		setTitle("Refueling app");
 		setSize(500, 500);
@@ -90,10 +101,9 @@ public class MainAppMenu extends JFrame {
 	private void initTable(){
 		tableModel = new FuelEntryTableModel(fuelEntries);
         table = new JTable(tableModel);
-//        table.setPreferredScrollableViewportSize(new Dimension(400, 200));
+        table.setPreferredScrollableViewportSize(new Dimension(450, 300));
         // Create custom sorter, to sort table columns
-		TableRowSorter<FuelEntryTableModel> sorter 
-		    = new TableRowSorter<FuelEntryTableModel>((FuelEntryTableModel) table.getModel());
+		sorter = new TableRowSorter<FuelEntryTableModel>(tableModel);
 		// This comparator sorts double values of fuel price and amount
 		Comparator<Double> doubleComparator = new Comparator<Double>() {
 			@Override
@@ -126,6 +136,47 @@ public class MainAppMenu extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane);
 	}
+	private void initFilteringComponents(){
+		// Set up row filters
+		fuelTypeFilter = new RowFilter<FuelEntryTableModel, Object>(){
+			@SuppressWarnings("rawtypes")
+			@Override
+			public boolean include(RowFilter.Entry entry) {
+				if (fuelNameFilterText.equals("all"))
+					return true;
+				return entry.getValue(0).equals(fuelNameFilterText.toString());
+			}
+		};
+		fuelDateFilter = new RowFilter<FuelEntryTableModel, Object>(){
+			@Override
+			public boolean include(Entry<? extends FuelEntryTableModel, ? extends Object> entry) {
+				try {
+					String d1 = new SimpleDateFormat("MMM").
+							format(new SimpleDateFormat("dd.MM.yyyy").parse((String) entry.getValue(3)));
+					return d1.equals(new SimpleDateFormat("MMM").format(filterMonthText));
+				} catch (ParseException e) {
+					return true;
+				}
+			}
+		};
+		// Lets create a new list from fuelnames and add a combobox
+		List<String> fuelTypes = new ArrayList<String>();
+		List<String> refuelingDates = new ArrayList<String>();
+		fuelTypes.add("all");
+		refuelingDates.add("all");
+		for (FuelEntry item : fuelEntries){
+			if (!fuelTypes.contains(item.getFuelName()))
+				fuelTypes.add(item.getFuelName());
+			if (!refuelingDates.contains(new SimpleDateFormat("MMM").format(item.getRefuelingDate())))
+				refuelingDates.add(new SimpleDateFormat("MMM").format(item.getRefuelingDate()));
+		}
+		JComboBox<?> comboBox = new JComboBox<Object>(fuelTypes.toArray());
+		JComboBox<?> comboBox2 = new JComboBox<Object> (refuelingDates.toArray());
+		comboBox.addItemListener(this);
+		comboBox2.addItemListener(this);
+		panel.add(comboBox);
+		panel.add(comboBox2);
+	}
 	private void initStatusbar() {
 		// Add statusbar as a label
         statusbar = new JLabel("Ready");
@@ -145,7 +196,7 @@ public class MainAppMenu extends JFrame {
         reloadData.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                getData(FileDao.DEFAULT_FILE_LOCATION);
+            	initUI();
            }
         });
 		panel.add(reloadData);
@@ -220,14 +271,28 @@ public class MainAppMenu extends JFrame {
 			e.printStackTrace();
 		}
 	}
-
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getStateChange() == ItemEvent.SELECTED) {
+			try {
+				filterMonthText = new SimpleDateFormat("MMM").parse(e.getItem().toString());
+				sorter.setRowFilter(fuelDateFilter);
+			} catch (ParseException e1) {
+				fuelNameFilterText = (String)e.getItem();
+				sorter.setRowFilter(fuelTypeFilter);
+			}	
+        }		
+	}
 	public static void main(String[] args) {
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				MainAppMenu mainMenu = new MainAppMenu();
-				mainMenu.setVisible(true);
+//				MainAppMenu mainMenu = new MainAppMenu();
+//				mainMenu.setVisible(true);
+				MainView view = new MainView();
+				MainViewController controller = new MainViewController(view);
+				controller.control();
 			}
 		});
 	}

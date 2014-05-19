@@ -66,4 +66,11 @@ public class FuelEntryTableModel extends AbstractTableModel {
 			break;
 		}
 	}
+	public double getTotalCosts(){
+		double costsSum = 0;
+		for (FuelEntry entry : getData()){
+			costsSum += entry.getTotalFuelPrice();
+		}
+		return costsSum;	
+	}
 }

@@ -39,6 +39,9 @@ public class FuelEntry {
 		setFuelAmount(Double.parseDouble(fuelAmount));
 		setRefuelingDate(new SimpleDateFormat("dd.MM.yyyy").parse(refuelingDate));
 	}
+	public double getTotalFuelPrice(){
+		return getFuelPrice()*getFuelAmount();
+	}
 	public String getFuelName() {
 		return fuelName;
 	}
