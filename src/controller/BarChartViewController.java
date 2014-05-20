@@ -23,7 +23,8 @@ public class BarChartViewController {
 			float r = rand.nextFloat();
 			float g = rand.nextFloat();
 			float b = rand.nextFloat();
-			view.addBar(new Color(r,g,b), (int) entry.getTotalFuelPrice());
+			String description = String.format("%.2f",entry.getTotalFuelPrice());
+			view.addBar(new Color(r,g,b), (int) entry.getTotalFuelPrice(),description);
 		}
 	}
 }

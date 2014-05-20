@@ -138,7 +138,7 @@ public class MainViewController implements ItemListener {
 								.equals(new SimpleDateFormat("MMM").format(filterMonthText))){
 						data.add(entry);
 					}
-					else if (entry.getFuelName().equals("all"))
+					else if (fuelNameFilterText.equals("all"))
 						data.add(entry);
 				}
 				BarChartViewController controller = new BarChartViewController(new BarChartView(), data);

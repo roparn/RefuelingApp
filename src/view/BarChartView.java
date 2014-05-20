@@ -2,7 +2,9 @@ package view;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -13,8 +15,10 @@ public class BarChartView extends JPanel {
 
 	private Map<Color, Integer> bars = new LinkedHashMap<Color, Integer>();
 	private JFrame frame;
+	List <String> descriptions;
 
 	public BarChartView() {
+		descriptions = new ArrayList<String>();
 		initFrame();
 	}
 
@@ -35,7 +39,8 @@ public class BarChartView extends JPanel {
 	 * @param value
 	 *            size of bar
 	 */
-	public void addBar(Color color, int value) {
+	public void addBar(Color color, int value, String desc) {
+		descriptions.add(desc);
 		bars.put(color, value);
 		repaint();
 	}
@@ -57,6 +62,8 @@ public class BarChartView extends JPanel {
 			return;
 		}
 		int x = 1;
+		int offset = width;
+
 		for (Color color : bars.keySet()) {
 			int value = bars.get(color);
 			int height = (int) ((getHeight() - 5) * ((double) value / max));
@@ -66,5 +73,12 @@ public class BarChartView extends JPanel {
 			g.drawRect(x, getHeight() - height, width, height);
 			x += (width + 2);
 		}
+
+		g.setColor(Color.WHITE);
+		if (descriptions.size()>0)
+			for (String desc : descriptions){
+				g.drawString(desc, (offset-width/2), 260);
+				offset+=width;
+			}
 	}
 }
