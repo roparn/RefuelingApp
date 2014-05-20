@@ -1,1 +1,1 @@
-This is a GUI application that displays fueling entries and allows them to be filtered. WIP, need to refine sorting and add filtering feature. Currently doesn't display contents of another parsed file.
+This is a GUI application that displays fueling entries and allows them to be filtered by date and fuel type. Can display a box chart, albeit with limited functions.
