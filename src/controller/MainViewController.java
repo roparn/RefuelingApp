@@ -21,6 +21,7 @@ import javax.swing.table.TableRowSorter;
 
 import models.FuelEntry;
 import models.FuelEntryTableModel;
+import view.BarChartView;
 import view.MainView;
 import dao.FileDao;
 
@@ -32,7 +33,7 @@ public class MainViewController implements ItemListener {
 	private TableRowSorter<FuelEntryTableModel> sorter;
 	private RowFilter<FuelEntryTableModel, Object> fuelTypeFilter;
 	private RowFilter<FuelEntryTableModel, Object> fuelDateFilter;
-	protected Object fuelNameFilterText;
+	protected String fuelNameFilterText = "all";
 	protected Date filterMonthText;
 	
 	public MainViewController(MainView view){
@@ -123,6 +124,27 @@ public class MainViewController implements ItemListener {
 				}
 			}
 		});
+		view.getShowChartView().addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				List<FuelEntry> data = new ArrayList<FuelEntry>();
+				for (FuelEntry entry : fuelEntries){
+					if (entry.getFuelName().equals(fuelNameFilterText)){
+						data.add(entry);
+					}
+					else if (filterMonthText != null 
+							&& new SimpleDateFormat("MMM").format(entry.getRefuelingDate())
+								.equals(new SimpleDateFormat("MMM").format(filterMonthText))){
+						data.add(entry);
+					}
+					else if (entry.getFuelName().equals("all"))
+						data.add(entry);
+				}
+				BarChartViewController controller = new BarChartViewController(new BarChartView(), data);
+				controller.control();
+			}
+		});
 	}
 	private void initFilteringComponents(){
 		// Lets create a new list from fuelnames and add a combobox
@@ -187,6 +209,7 @@ public class MainViewController implements ItemListener {
 				filterMonthText = new SimpleDateFormat("MMM").parse(event.getItem().toString());
 				sorter.setRowFilter(fuelDateFilter);
 			} catch (ParseException e1) {
+				filterMonthText = null;
 				fuelNameFilterText = (String)event.getItem();
 				sorter.setRowFilter(fuelTypeFilter);
 			}

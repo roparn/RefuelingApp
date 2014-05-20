@@ -35,6 +35,11 @@ public class MainView extends JFrame {
 	private JComboBox<Object> comboBox;
 	private JComboBox<Object> comboBox2;
 
+	private JMenuItem showChartView;
+	
+	public JMenuItem getShowChartView(){
+		return this.showChartView;
+	}
 	public JCheckBoxMenuItem getShowStatusBar() {
 		return showStatusBar;
 	}
@@ -151,10 +156,12 @@ public class MainView extends JFrame {
 		// Add "View" menu item
 		showStatusBar = new JCheckBoxMenuItem("Show StatusBar");
 		showStatusBar.setState(true);
+		showChartView = new JMenuItem("Show chart view");
 		// Add menu items to menu
 		fileMenu.add(openMenuItem);
 		fileMenu.add(exitMenuItem);
 		viewMenu.add(showStatusBar);
+		viewMenu.add(showChartView);
 		// Add menu to menubar
 		menubar.add(fileMenu);
 		menubar.add(viewMenu);
