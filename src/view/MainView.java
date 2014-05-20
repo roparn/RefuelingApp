@@ -149,7 +149,7 @@ public class MainView extends JFrame {
 		exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setToolTipText("Exit application");
 		// Add "View" menu item
-		showStatusBar = new JCheckBoxMenuItem("Show StatuBar");
+		showStatusBar = new JCheckBoxMenuItem("Show StatusBar");
 		showStatusBar.setState(true);
 		// Add menu items to menu
 		fileMenu.add(openMenuItem);

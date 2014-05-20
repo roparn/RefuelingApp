@@ -48,7 +48,7 @@ public class MainViewController implements ItemListener {
 		initFilteringComponents();
 		initTable();
 		
-		
+		// Add actionlistener to reload button
 		view.getReloadDataButton().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
